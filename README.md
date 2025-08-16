@@ -3,6 +3,7 @@
 This is a very basic VueJs application to showcase the Data Grid implementation using native VueJs implementation, without any custom plugins.
 
 ## HOW TO
+
 To run the code locally simply start the VueJs application and see it in the browser. Data is dynamically loaded from an external API
 
 ```
@@ -25,6 +26,11 @@ $yarn dev    # common for Vite-based projects
 
 open tha application in your browser: e.g. navigate to http://localhost:8080
 
+### If using within the Docker container (easiest way)
+
+```
+$docker compose up --build
+```
 
 ## Recommended IDE Setup
 
