@@ -12,6 +12,14 @@
     </select>
     <p v-else>Loading data...</p>
     <h2>Entities</h2>
+    <p>Global search:</p>
+    <input
+      type="text"
+      v-model="searchQuery"
+      @keyup.stop="searchTableData"
+      placeholder="Global Search..."
+    />
+    <hr />
     <table
       v-if="userTablesStore.userTable"
       border="1"
@@ -95,10 +103,16 @@ const tableConfigsStore = useTableConfigsStore()
 const selectedConfig = ref<string | null>(null)
 const error = ref<string>('')
 
+const searchQuery = ref<string>('')
+
+async function searchTableData() {
+  await fetchUserTable()
+}
+
 async function fetchUserTable() {
   if (selectedConfig.value) {
     try {
-      await userTablesStore.fetchUserTable(Number(selectedConfig.value))
+      await userTablesStore.fetchUserTable(Number(selectedConfig.value), searchQuery.value)
     } catch (err: unknown) {
       if (err instanceof Error) {
         error.value = 'Failed to fetch user tables: ' + err.message

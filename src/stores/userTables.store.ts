@@ -8,8 +8,8 @@ export const useUserTablesStore = defineStore('userTables', () => {
 
   const userTable = ref<UserTable>()
 
-  async function fetchUserTable(configId: number) {
-    userTable.value = await userTablesService.getAll(configId)
+  async function fetchUserTable(configId: number, globalSearchQuery: string = '') {
+    userTable.value = await userTablesService.getAll(configId, globalSearchQuery)
   }
 
   return {

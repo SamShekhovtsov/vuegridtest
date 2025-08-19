@@ -9,15 +9,21 @@ export interface UserTable {
   results: UserTableRecord[]
 }
 
-export async function getUserTablesFromApi(configId: number): Promise<UserTable> {
+export async function getUserTablesFromApi(
+  configId: number,
+  globalSearchQuery: string = '',
+): Promise<UserTable> {
   const data = ref<UserTable>()
 
-  const response = await fetch(
+  let requestUrl =
     import.meta.env.VITE_API_BASE_URL +
-      '/dtables/fetch?config_id=' +
-      configId +
-      '&page=1&page_size=25',
-  )
+    '/dtables/fetch?config_id=' +
+    configId +
+    '&page=1&page_size=25'
+  if (globalSearchQuery) {
+    requestUrl += '&global=' + encodeURIComponent(globalSearchQuery)
+  }
+  const response = await fetch(requestUrl)
   if (!response.ok) {
     throw new Error(`HTTP error! status: ${response.status}`)
   }
