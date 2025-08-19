@@ -1,25 +1,46 @@
 <template>
   <div>
-    <h2>Fetched Data:</h2>
+    <h2>Access custom table {{ tableConfigsStore.tableConfigs.length }}</h2>
+    <select
+      v-if="tableConfigsStore.tableConfigs.length"
+      v-model="selectedConfig"
+      @change="fetchUserTable"
+    >
+      <option v-for="(item, index) in tableConfigsStore.tableConfigs" :key="index" :value="item.id">
+        {{ item.name }}
+      </option>
+    </select>
+    <p v-else>Loading data...</p>
+    <h2>Entities</h2>
     <table
-      v-if="userTablesStore.userTables.length"
+      v-if="userTablesStore.userTable"
       border="1"
       width="100%"
       height="100%"
       class="styled-table"
     >
       <thead>
-        <th>UserId</th>
-        <th>Name</th>
+        <tr>
+          <th v-for="item in userTablesStore.userTable.columns" :key="item">
+            {{ item }}
+          </th>
+        </tr>
       </thead>
       <tbody>
-        <tr v-for="item in userTablesStore.userTables" :key="item.id">
-          <td>{{ item.id }}</td>
-          <td>{{ item.name }}</td>
+        <tr
+          v-for="(rowRecord, recordIndex) in userTablesStore.userTable.results"
+          :key="recordIndex"
+        >
+          <td
+            v-for="(itemColumnName, columnIndex) in userTablesStore.userTable.columns"
+            :key="columnIndex"
+          >
+            {{ rowRecord[itemColumnName] }}
+          </td>
         </tr>
       </tbody>
     </table>
-    <p v-else>Loading data...</p>
+    <p v-else>Select a config first...</p>
     <p v-if="error">{{ error }}</p>
   </div>
 </template>
@@ -34,7 +55,7 @@
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
 }
 
-.styled-table thead th {
+.styled-table thead tr th {
   background-color: #009879;
   color: #ffffff;
   text-align: left;
@@ -64,16 +85,38 @@
 </style>
 
 <script setup lang="ts">
+import { useTableConfigsStore } from '@/stores/tableConfig.store'
 import { useUserTablesStore } from '@/stores/userTables.store'
 import { onMounted, ref } from 'vue'
 
 const userTablesStore = useUserTablesStore()
+const tableConfigsStore = useTableConfigsStore()
 
+const selectedConfig = ref<string | null>(null)
 const error = ref<string>('')
+
+async function fetchUserTable() {
+  if (selectedConfig.value) {
+    try {
+      await userTablesStore.fetchUserTable(Number(selectedConfig.value))
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        error.value = 'Failed to fetch user tables: ' + err.message
+      } else if (typeof err === 'string') {
+        error.value = 'Failed to fetch user tables: ' + err
+      } else {
+        error.value = 'Failed to fetch user tables: unknown error'
+      }
+      console.error('Failed to fetch user tables: ', err)
+    }
+  } else {
+    error.value = 'Please select a custom table to fetch data.'
+  }
+}
 
 onMounted(() => {
   try {
-    userTablesStore.fetchUserTables()
+    tableConfigsStore.fetchTableConfigs()
   } catch (err: unknown) {
     if (err instanceof Error) {
       error.value = 'Failed to fetch data: ' + err.message

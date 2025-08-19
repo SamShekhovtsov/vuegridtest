@@ -6,14 +6,14 @@ import type { UserTable } from '@/api/userTable'
 export const useUserTablesStore = defineStore('userTables', () => {
   const userTablesService = useUserTablesService()
 
-  const userTables = ref<UserTable[]>([])
+  const userTable = ref<UserTable>()
 
-  async function fetchUserTables() {
-    userTables.value = await userTablesService.getAll()
+  async function fetchUserTable(configId: number) {
+    userTable.value = await userTablesService.getAll(configId)
   }
 
   return {
-    userTables,
-    fetchUserTables,
+    userTable,
+    fetchUserTable,
   }
 })
