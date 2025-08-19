@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h2>Access custom table {{ tableConfigsStore.tableConfigs.length }}</h2>
+    <h2>Access custom table ({{ tableConfigsStore.tableConfigs.length }})</h2>
     <select
       v-if="tableConfigsStore.tableConfigs.length"
       v-model="selectedConfig"
@@ -49,11 +49,27 @@
       </tbody>
     </table>
     <p v-else>Select a config first...</p>
+    <button @click="prevPage" :disabled="currentPage === 1">Previous</button>
+    <button
+      class="paging-page"
+      v-for="page in totalPages"
+      :key="page"
+      @click="goToPage(page)"
+      :class="{ active: page === currentPage }"
+    >
+      {{ page }}
+    </button>
+    <button @click="nextPage" :disabled="currentPage === totalPages">Next</button>
     <p v-if="error">{{ error }}</p>
   </div>
 </template>
 
 <style scoped>
+button.paging-page.active {
+  background-color: #009879;
+  color: black;
+}
+
 .styled-table {
   border-collapse: collapse;
   margin: 25px 0;
@@ -104,6 +120,23 @@ const selectedConfig = ref<string | null>(null)
 const error = ref<string>('')
 
 const searchQuery = ref<string>('')
+const currentPage = ref<number>(1)
+const totalPages = ref<number>(1)
+
+async function prevPage() {
+  currentPage.value -= 1
+  await fetchUserTable()
+}
+
+async function nextPage() {
+  currentPage.value += 1
+  await fetchUserTable()
+}
+
+async function goToPage(page: number) {
+  currentPage.value = page
+  await fetchUserTable()
+}
 
 async function searchTableData() {
   await fetchUserTable()
@@ -112,7 +145,23 @@ async function searchTableData() {
 async function fetchUserTable() {
   if (selectedConfig.value) {
     try {
-      await userTablesStore.fetchUserTable(Number(selectedConfig.value), searchQuery.value)
+      await userTablesStore.fetchUserTable(
+        Number(selectedConfig.value),
+        searchQuery.value,
+        currentPage.value,
+      )
+
+      if (
+        userTablesStore.userTable &&
+        userTablesStore.userTable.total > 0 &&
+        userTablesStore.userTable.total > userTablesStore.userTable.page_size
+      ) {
+        totalPages.value = Math.ceil(
+          userTablesStore.userTable.total / userTablesStore.userTable.page_size,
+        )
+      } else {
+        totalPages.value = 1
+      }
     } catch (err: unknown) {
       if (err instanceof Error) {
         error.value = 'Failed to fetch user tables: ' + err.message
@@ -128,19 +177,7 @@ async function fetchUserTable() {
   }
 }
 
-onMounted(() => {
-  try {
-    tableConfigsStore.fetchTableConfigs()
-  } catch (err: unknown) {
-    if (err instanceof Error) {
-      error.value = 'Failed to fetch data: ' + err.message
-    } else if (typeof err === 'string') {
-      error.value = 'Failed to fetch data: ' + err
-    } else {
-      error.value = 'Failed to fetch data: unknown error'
-    }
-
-    console.error('Failed to fetch data: ', err)
-  }
+onMounted(async () => {
+  await tableConfigsStore.fetchTableConfigs()
 })
 </script>

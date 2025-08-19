@@ -6,12 +6,16 @@ export interface UserTableRecord {
 
 export interface UserTable {
   columns: string[]
+  total: number
+  page: number
+  page_size: number
   results: UserTableRecord[]
 }
 
 export async function getUserTablesFromApi(
   configId: number,
   globalSearchQuery: string = '',
+  page: number = 1,
 ): Promise<UserTable> {
   const data = ref<UserTable>()
 
@@ -19,7 +23,9 @@ export async function getUserTablesFromApi(
     import.meta.env.VITE_API_BASE_URL +
     '/dtables/fetch?config_id=' +
     configId +
-    '&page=1&page_size=25'
+    '&page=' +
+    page.toString() +
+    '&page_size=5'
   if (globalSearchQuery) {
     requestUrl += '&global=' + encodeURIComponent(globalSearchQuery)
   }
