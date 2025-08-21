@@ -12,6 +12,26 @@ export interface UserTable {
   results: UserTableRecord[]
 }
 
+export interface CreateUserTableRecord {
+  name: string
+  src_table: string // = 'entities' - default source table
+  rows: string[]
+  datapoints: string[]
+  columns: UserTableColumnDefinition[]
+  sharedWith: string // "@team"
+}
+
+export interface CreateUserTableRecordResponse {
+  config_id: number
+  name: string
+  debug_internal_table: string
+}
+
+export interface UserTableColumnDefinition {
+  name: string
+  type: string
+}
+
 export async function getUserTablesFromApi(
   configId: number,
   globalSearchQuery: string = '',
@@ -37,4 +57,21 @@ export async function getUserTablesFromApi(
   data.value = jsonData as UserTable
 
   return data.value
+}
+
+export async function createUserTableRecord(
+  record: CreateUserTableRecord,
+): Promise<CreateUserTableRecordResponse> {
+  const response = await fetch(import.meta.env.VITE_API_BASE_URL + '/dtables/create', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(record),
+  })
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`)
+  }
+  const jsonData = await response.json()
+  return jsonData as CreateUserTableRecordResponse
 }

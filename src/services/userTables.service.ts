@@ -1,4 +1,10 @@
-import { getUserTablesFromApi, type UserTable } from '@/api/userTable'
+import {
+  createUserTableRecord,
+  getUserTablesFromApi,
+  type CreateUserTableRecord,
+  type CreateUserTableRecordResponse,
+  type UserTable,
+} from '@/api/userTable'
 
 export function useUserTablesService() {
   async function getAll(
@@ -9,7 +15,12 @@ export function useUserTablesService() {
     return await getUserTablesFromApi(configId, globalSearchQuery, page)
   }
 
+  async function create(record: CreateUserTableRecord): Promise<CreateUserTableRecordResponse> {
+    return await createUserTableRecord(record)
+  }
+
   return {
     getAll,
+    create,
   }
 }
