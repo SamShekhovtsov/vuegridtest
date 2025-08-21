@@ -11,6 +11,9 @@
       </option>
     </select>
     <p v-else>Loading data...</p>
+    <p>
+      <router-link to="/create">Create Custom Table</router-link>
+    </p>
     <h2>Entities</h2>
     <p>Global search:</p>
     <input
